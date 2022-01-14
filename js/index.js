@@ -92,7 +92,7 @@ loadData().then(data => {
 
     d3.select('#p').on('change', function(){
         lineParam = d3.select(this).property('value');
-        drawLineChart();
+        updateLineChart();
     });
 
     function updateBar(){
@@ -115,7 +115,6 @@ loadData().then(data => {
             .attr('fill', d => colorScale(d.key))
             .attr('height', d => height - yBar(d.value))
             .attr('width', 100)
-            .attr('fill-opacity', 1)
             .attr('_region', d => d.key);
 
         xBarAxis.call(d3.axisBottom(xBar));
@@ -124,12 +123,15 @@ loadData().then(data => {
         // Update Diagrams selection (opacity)
         bars.on('click', function() {
             clickedBar = d3.select(this);
-            changeGraphVisibility(bars, clickedBar);
+            highlighted = clickedBar.attr('_region');
+            bars.attr('fill-opacity', 0.25);
+            clickedBar.attr('fill-opacity', 1);
+            updateScatterPlot();
         });
         bars.on('dblclick', function() {
-            // changeGraphVisibility(bars);
+            highlighted = "";
             updateScatterPlot();
-            updateBar();
+            bars.attr('fill-opacity', 1);
         });
     }
 
@@ -155,14 +157,18 @@ loadData().then(data => {
         circles.on('click', function() {
             circles.attr('stroke-width', 'none');
             selected = d3.select(this);
-            drawLineChart();
+            updateLineChart();
         });
         circles.on('dblclick', function() {
             circles.attr('stroke-width', 'none');
             selected = null;
-            drawLineChart();
+            updateLineChart();
         });
 
+        country = null
+        if (selected)
+            country = selected.attr('_country');
+        
         selection.merge(circles)
                 .attr('r', d => radiusScale(d[rParam][year]))
                 .attr('cx', d => x(Number(d[xParam][year])))
@@ -172,32 +178,24 @@ loadData().then(data => {
                 .attr('display', null)
                 .attr('_region', d => d.region)
                 .attr('_country', d => d.country);
+        
+        if (country) {
+            selected = scatterPlot.selectAll('circle[_country="'+country+'"]');
+            selected.moveToFront();
+            selected.attr('stroke-width', 3);
+        }
+        if (highlighted) {
+            selection.attr('display', "none")
+            highlightedCurcls = scatterPlot.selectAll('circle[_region="'+highlighted+'"]');
+            highlightedCurcls.moveToFront();
+            highlightedCurcls.attr('display', null);
+        }
 
         xAxis.call(d3.axisBottom(x));
         yAxis.call(d3.axisLeft(y));
-
-        selected = null
-        drawLineChart();
     }
 
-    function changeGraphVisibility(bars, clickedBar){
-        const allCircles = scatterPlot.selectAll('circle').data(data);
-        const region = clickedBar.attr('_region');
-        const selectedCircles = scatterPlot.selectAll("circle")
-            .filter(function() {
-                return d3.select(this).attr("_region") == region
-            })
-        // Hide all grapshics
-        bars.attr('fill-opacity', 0.25);
-        // allCircles.attr('fill-opacity', 0.1);
-        allCircles.attr('display', "none")
-        // Show only selected grapshics
-        clickedBar.attr('fill-opacity', 1);
-        selectedCircles.attr('display', null)
-        selectedCircles.moveToFront();
-    }
-
-    function drawLineChart() {
+    function updateLineChart() {
         if (!selected) {
             d3.select('#line-selector').style('display', "none")
             lineChart.style('display', "none")
@@ -244,7 +242,7 @@ loadData().then(data => {
         selection.transition()
             .duration(400)
             .attr("d", d3.line()
-                .x(d => { console.log(d); return xLine(d.year); })
+                .x(d => xLine(d.year))
                 .y(d => yLine(d.value))
                 .curve(d3.curveLinear)(lineData));
         selection.exit().remove();
