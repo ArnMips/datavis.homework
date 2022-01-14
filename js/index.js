@@ -231,31 +231,23 @@ loadData().then(data => {
         const yDomain = d3.extent(yValues);
         yLine.domain(yDomain);
 
-        // Draw Multiple Gaphs! - Bad 
-        // lineChart.append('path')
-        //     .attr("d", 
-        //         d3.line()
-        //             .x(function(d) { return xLine(d.year); })
-        //             .y(function(d) { return yLine(d.value); })
-        //             .curve(d3.curveLinear)(lineData)
-        //     )
-        //     .attr("stroke", "rgb(11, 66, 170)")
-        //     .attr("stroke-width", 2)
-        //     .attr("fill", "none")
-        //     ;
-
-        // PROBLEM: Draw only once!
-        const selection = lineChart.selectAll('path').data([lineData]);
+        selection = lineChart.selectAll('path.lineChart').data([lineData]);
         selection.enter().append('path')
-            .attr("d", 
-                d3.line()
-                    .x(d => xLine(d.year))
-                    .y(d => yLine(d.value))
-                    .curve(d3.curveLinear)(lineData)
-            )
+            .attr("d", d3.line()
+                .x(d => xLine(d.year))
+                .y(d => yLine(d.value))
+                .curve(d3.curveLinear)(lineData))
             .attr("stroke", "rgb(11, 66, 170)")
             .attr("stroke-width", 2)
-            .attr("fill", "none");
+            .attr("fill", "none")
+            .attr("class", "lineChart");
+        selection.transition()
+            .duration(400)
+            .attr("d", d3.line()
+                .x(d => { console.log(d); return xLine(d.year); })
+                .y(d => yLine(d.value))
+                .curve(d3.curveLinear)(lineData));
+        selection.exit().remove();
 
         xLineAxis.call(d3.axisBottom(xLine).tickFormat(d3.format("d")));
         yLineAxis.call(d3.axisLeft(yLine));
