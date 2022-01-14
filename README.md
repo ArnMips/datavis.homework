@@ -101,3 +101,10 @@ To submit the homework:
 Для отладки вы можете запустить [локальный сервер на python](https://developer.mozilla.org/ru/docs/Learn/Common_questions/set_up_a_local_testing_server).
 
 For debugging, you can run a [local server in python](https://developer.mozilla.org/ru/docs/Learn/Common_questions/set_up_a_local_testing_server).
+
+
+
+##LITRS
+https://bost.ocks.org/mike/join/
+https://frontender.info/vvedenie-v-djs/
+https://www.d3indepth.com/enterexit/
