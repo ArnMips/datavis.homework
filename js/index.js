@@ -32,7 +32,7 @@ const x = d3.scaleLinear().range([margin*2, width-margin]);
 const y = d3.scaleLinear().range([height-margin, margin]);
 
 const xBar = d3.scaleBand().range([margin*2, barWidth-margin]).padding(0.1);
-const yBar = d3.scaleLinear().range([height-margin, margin])
+const yBar = d3.scaleLinear().range([height-margin, margin]);
 
 const xLine = d3.scaleLinear().range([margin*2, width-margin]);
 const yLine = d3.scaleLinear().range([height-margin, margin]);
@@ -92,7 +92,6 @@ loadData().then(data => {
 
     d3.select('#p').on('change', function(){
         lineParam = d3.select(this).property('value');
-        console.log(lineParam)
         drawLineChart();
     });
 
@@ -112,12 +111,15 @@ loadData().then(data => {
 
         selection.merge(bars)
             .attr('x', d => xBar(d.key))
-            .attr('y', d => yBar(d.value))
+            .attr('y', d => yBar(d.value)-30)
             .attr('fill', d => colorScale(d.key))
             .attr('height', d => height - yBar(d.value))
             .attr('width', 100)
             .attr('fill-opacity', 1)
             .attr('_region', d => d.key);
+
+        xBarAxis.call(d3.axisBottom(xBar));
+        yBarAxis.call(d3.axisLeft(yBar));
 
         // Update Diagrams selection (opacity)
         bars.on('click', function() {
@@ -171,6 +173,9 @@ loadData().then(data => {
                 .attr('_region', d => d.region)
                 .attr('_country', d => d.country);
 
+        xAxis.call(d3.axisBottom(x));
+        yAxis.call(d3.axisLeft(y));
+
         selected = null
         drawLineChart();
     }
@@ -218,8 +223,6 @@ loadData().then(data => {
                 });
          });
 
-        console.log(lineData);
-
         const xYears = lineData.map(d => d.year);
         const xDomain = d3.extent(xYears);
         xLine.domain(xDomain);
@@ -253,6 +256,9 @@ loadData().then(data => {
             .attr("stroke", "rgb(11, 66, 170)")
             .attr("stroke-width", 2)
             .attr("fill", "none");
+
+        xLineAxis.call(d3.axisBottom(xLine).tickFormat(d3.format("d")));
+        yLineAxis.call(d3.axisLeft(yLine));
     }
 
     updateBar();
