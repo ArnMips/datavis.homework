@@ -254,6 +254,9 @@ loadData().then(data => {
             .attr("stroke-width", 2)
             .attr("fill", "none");
     }
+
+    updateBar();
+    updateScatterPlot();
 });
 
 
